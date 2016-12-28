@@ -9,7 +9,10 @@ import (
 
 func main() {
 	logger := logrus.New()
-	logger.Formatter = stackdriver.NewFormatter("test-service", "v0.1.0")
+	logger.Formatter = stackdriver.NewFormatter(
+		stackdriver.WithService("test-service"),
+		stackdriver.WithVersion("v0.1.0"),
+	)
 
 	logger.Debug("starting application")
 	logger.Info("application up and running")

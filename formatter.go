@@ -29,60 +29,44 @@ var levelsToSeverity = map[logrus.Level]severity{
 	logrus.PanicLevel: severityAlert,
 }
 
-type logEntry struct {
-	Severity      severity    `json:"severity"`
-	TextPayload   string      `json:"textPayload,omitempty"`
-	StructPayload interface{} `json:"jsonPayload,omitempty"`
-}
-
-type errorData struct {
-	ServiceContext serviceContext `json:"serviceContext"`
-	Message        string         `json:"message"`
-	Context        context        `json:"context"`
-}
-
-type serviceContext struct {
-	Service string `json:"service"`
-	Version string `json:"version,omitempty"`
-}
-
-type context struct {
-	ReportLocation reportLocation `json:"reportLocation"`
-}
-
-type reportLocation struct {
-	FilePath     string `json:"filePath"`
-	LineNumber   int    `json:"lineNumber"`
-	FunctionName string `json:"functionName"`
-}
-
-func getSkipLevel() int {
-	return 4
-}
-
 type Formatter struct {
 	Service string
 	Version string
 }
 
-func NewFormatter(service, version string) *Formatter {
-	return &Formatter{
-		Service: service,
-		Version: version,
+type Option func(*Formatter)
+
+func WithService(n string) Option {
+	return func(f *Formatter) {
+		f.Service = n
 	}
 }
 
-func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
-	entry := logEntry{
-		Severity: levelsToSeverity[e.Level],
+func WithVersion(v string) Option {
+	return func(f *Formatter) {
+		f.Version = v
 	}
+}
 
+func NewFormatter(options ...Option) *Formatter {
+	var fmtr Formatter
+	for _, option := range options {
+		option(&fmtr)
+	}
+	return &fmtr
+}
+
+func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	payload := make(map[string]interface{})
+
+	severity := levelsToSeverity[e.Level]
+
+	// Copy entry data to the error payload.
 	for k, v := range e.Data {
 		payload[k] = v
 	}
 
-	switch entry.Severity {
+	switch severity {
 	case severityError:
 		fallthrough
 	case severityCritical:
@@ -93,6 +77,9 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 			Version: f.Version,
 		}
 
+		// When using WithError(), the error is sent separately, but Error
+		// Reporting expects it to be a part of the message so we append it
+		// instead.
 		if err, ok := payload["error"]; ok {
 			payload["message"] = fmt.Sprintf("%s: %s", e.Message, err)
 			delete(payload, "error")
@@ -100,32 +87,30 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 			payload["message"] = e.Message
 		}
 
-		var ctx context
-		skip := getSkipLevel()
+		skip, err := getSkipLevel(e.Level)
+		if err != nil {
+			return nil, err
+		}
 		if pc, file, line, ok := runtime.Caller(skip); ok {
 			fn := runtime.FuncForPC(pc)
-			ctx.ReportLocation = reportLocation{
-				FilePath:     file,
-				LineNumber:   line,
-				FunctionName: fn.Name(),
+			payload["context"] = context{
+				ReportLocation: reportLocation{
+					FilePath:     file,
+					LineNumber:   line,
+					FunctionName: fn.Name(),
+				},
 			}
 		}
-		payload["context"] = ctx
-
-		entry.StructPayload = payload
 	default:
-		if len(payload) == 0 {
-			entry.TextPayload = e.Message
-		} else {
-			payload["message"] = e.Message
-			entry.StructPayload = payload
-		}
+		payload["message"] = e.Message
 	}
 
-	b, err := json.MarshalIndent(entry, "", "  ")
+	payload["severity"] = severity
+
+	b, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
 	}
 
-	return append(b, byte('\n')), nil
+	return append(b, '\n'), nil
 }
