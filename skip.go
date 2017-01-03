@@ -35,21 +35,17 @@ func getSkipLevel(level logrus.Level) (int, error) {
 
 	}
 
-	// detect until we escape logrus back to the client
-	// package
-	// skip out of runtime and logrusgce package, hence
-	// 3
+	// detect until we escape logrus back to the client package skip out of
+	// runtime and stackdriver package, hence 3
 	stackSkipsCallers := make([]uintptr, 20)
 	runtime.Callers(3, stackSkipsCallers)
 	for i, pc := range stackSkipsCallers {
 		f := runtime.FuncForPC(pc)
-		if strings.HasPrefix(f.Name(), "github.com/Sirupsen/logrus") == true {
+		if strings.Contains(f.Name(), "github.com/Sirupsen/logrus") {
 			continue
-
 		}
 		stackSkips[level] = i + 1
 		return i + 1, nil
-
 	}
 	return 0, ErrSkipNotFound
 }
