@@ -3,8 +3,8 @@ package main
 import (
 	"strconv"
 
-	"github.com/Sirupsen/logrus"
 	stackdriver "github.com/TV4/logrus-stackdriver-formatter"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
