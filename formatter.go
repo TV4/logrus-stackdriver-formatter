@@ -93,13 +93,18 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		}
 		if pc, file, line, ok := runtime.Caller(skip); ok {
 			fn := runtime.FuncForPC(pc)
-			payload["context"] = context{
-				ReportLocation: reportLocation{
-					FilePath:     file,
-					LineNumber:   line,
-					FunctionName: fn.Name(),
-				},
+			if _, ok := payload["context"]; !ok {
+				payload["context"] = make(map[string]interface{})
 			}
+
+			ctx := payload["context"].(map[string]interface{})
+			ctx["reportLocation"] = reportLocation{
+				FilePath:     file,
+				LineNumber:   line,
+				FunctionName: fn.Name(),
+			}
+
+			payload["context"] = ctx
 		}
 	default:
 		payload["message"] = e.Message
