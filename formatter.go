@@ -12,7 +12,6 @@ import (
 type severity string
 
 const (
-	severityDefault  severity = "DEFAULT"
 	severityDebug    severity = "DEBUG"
 	severityInfo     severity = "INFO"
 	severityWarning  severity = "WARNING"
@@ -30,25 +29,30 @@ var levelsToSeverity = map[logrus.Level]severity{
 	logrus.PanicLevel: severityAlert,
 }
 
+// Formatter implements Stackdriver formatting for logrus.
 type Formatter struct {
 	Service string
 	Version string
 }
 
+// Option lets you configure the Formatter.
 type Option func(*Formatter)
 
+// WithService lets you configure the service name used for error reporting.
 func WithService(n string) Option {
 	return func(f *Formatter) {
 		f.Service = n
 	}
 }
 
+// WithVersion lets you configure the service version used for error reporting.
 func WithVersion(v string) Option {
 	return func(f *Formatter) {
 		f.Version = v
 	}
 }
 
+// NewFormatter returns a new Formatter.
 func NewFormatter(options ...Option) *Formatter {
 	var fmtr Formatter
 	for _, option := range options {
@@ -57,6 +61,7 @@ func NewFormatter(options ...Option) *Formatter {
 	return &fmtr
 }
 
+// Format formats a logrus entry according to the Stackdriver specifications.
 func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	payload := make(map[string]interface{})
 
