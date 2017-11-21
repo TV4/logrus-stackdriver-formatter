@@ -35,7 +35,7 @@ type context struct {
 //
 // https://cloud.google.com/error-reporting/docs/formatting-error-messages#ErrorContext.FIELDS.report_location
 type reportLocation struct {
-	FilePath     string `json:"filePath"`
-	LineNumber   int    `json:"lineNumber"`
-	FunctionName string `json:"functionName"`
+	FilePath     string `json:"filePath,omitempty"`
+	LineNumber   int    `json:"lineNumber,omitempty"`
+	FunctionName string `json:"functionName,omitempty"`
 }

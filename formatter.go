@@ -3,8 +3,9 @@ package stackdriver
 import (
 	"encoding/json"
 	"fmt"
-	"runtime"
+	"strconv"
 
+	"github.com/go-stack/stack"
 	"github.com/sirupsen/logrus"
 )
 
@@ -87,25 +88,26 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 			payload["message"] = e.Message
 		}
 
-		skip, err := getSkipLevel(e.Level)
-		if err != nil {
-			return nil, err
-		}
-		if pc, file, line, ok := runtime.Caller(skip); ok {
-			fn := runtime.FuncForPC(pc)
-			if _, ok := payload["context"]; !ok {
-				payload["context"] = make(map[string]interface{})
-			}
+		c := stack.Caller(4)
 
-			ctx := payload["context"].(map[string]interface{})
-			ctx["reportLocation"] = reportLocation{
-				FilePath:     file,
-				LineNumber:   line,
-				FunctionName: fn.Name(),
-			}
+		var (
+			filePath      = fmt.Sprintf("%+s", c)
+			lineNumber, _ = strconv.ParseInt(fmt.Sprintf("%d", c), 10, 64)
+			functionName  = fmt.Sprintf("%n", c)
+		)
 
-			payload["context"] = ctx
+		// Make sure not to replace the context, in case user specified httpRequest.
+		if _, ok := payload["context"]; !ok {
+			payload["context"] = make(map[string]interface{})
 		}
+
+		ctx := payload["context"].(map[string]interface{})
+		ctx["reportLocation"] = reportLocation{
+			FilePath:     filePath,
+			LineNumber:   int(lineNumber),
+			FunctionName: functionName,
+		}
+		payload["context"] = ctx
 	default:
 		payload["message"] = e.Message
 	}
