@@ -16,7 +16,7 @@ go get -u github.com/TV4/logrus-stackdriver-formatter
 package main
 
 import (
-    "github.com/Sirupsen/logrus"
+    "github.com/sirupsen/logrus"
     stackdriver "github.com/TV4/logrus-stackdriver-formatter"
 )
 
@@ -30,5 +30,53 @@ func init() {
     log.Level = logrus.DebugLevel
     
     log.Info("ready to log!")
+}
+```
+
+Here's a sample entry (prettified) from the example:
+
+```json
+{
+  "context": {    "reportLocation": {
+      "filePath": "example/main.go",
+      "lineNumber": 22,
+      "functionName": "main"
+    }
+  },
+  "message": "unable to parse integer: strconv.ParseInt: parsing \"text\": invalid syntax",
+  "serviceContext": {
+    "service": "test-service",
+    "version": "v0.1.0"
+  },
+  "severity": "ERROR"
+}
+```
+
+## HTTP request context
+
+If you'd like to add additional context like `httpRequest`, here's a convenience function for creating a HTTP logger:
+
+```go
+func httpLogger(logger *logrus.Logger, r *http.Request) *logrus.Entry {
+	return logger.WithFields(logrus.Fields{
+		"context": map[string]interface{}{
+			"httpRequest": map[string]interface{}{
+				"method":    r.Method,
+				"url":       r.URL.String(),
+				"userAgent": r.Header.Get("User-Agent"),
+				"referrer":  r.Header.Get("Referer"),
+			},
+		},
+	})
+}
+```
+
+Then, in your HTTP handler, create a new context logger and all your log entries will have the HTTP request context appended to them:
+
+```go
+func handler(w http.ResponseWriter, r *http.Request) {
+	httplog := httpLogger(log, r)
+	...
+	httplog.Infof("Logging with HTTP request context")
 }
 ```
