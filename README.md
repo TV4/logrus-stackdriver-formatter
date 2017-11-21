@@ -59,7 +59,7 @@ Here's a sample entry (prettified) from the example:
 
 ## HTTP request context
 
-If you'd like to add additional context like `httpRequest`, here's a convenience function for creating a HTTP logger:
+If you'd like to add additional context like the `httpRequest`, here's a convenience function for creating a HTTP logger:
 
 ```go
 func httpLogger(logger *logrus.Logger, r *http.Request) *logrus.Entry {
