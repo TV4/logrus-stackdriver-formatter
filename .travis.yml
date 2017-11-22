@@ -7,7 +7,7 @@ sudo: false
 
 install:
   - go get github.com/go-stack/stack
-	- go get github.com/sirupsen/logrus
+  - go get github.com/sirupsen/logrus
   - go get github.com/golang/lint/golint
 
 script:
