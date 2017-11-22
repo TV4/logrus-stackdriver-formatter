@@ -32,8 +32,6 @@ var levelsToSeverity = map[logrus.Level]severity{
 	logrus.PanicLevel: severityAlert,
 }
 
-type httpRequest map[string]interface{}
-
 type serviceContext struct {
 	Service string `json:"service,omitempty"`
 	Version string `json:"version,omitempty"`
