@@ -64,13 +64,11 @@ If you'd like to add additional context like the `httpRequest`, here's a conveni
 ```go
 func httpLogger(logger *logrus.Logger, r *http.Request) *logrus.Entry {
     return logger.WithFields(logrus.Fields{
-        "context": map[string]interface{}{
         "httpRequest": map[string]interface{}{
             "method":    r.Method,
-                "url":       r.URL.String(),
-                "userAgent": r.Header.Get("User-Agent"),
-                "referrer":  r.Header.Get("Referer"),
-            },
+            "url":       r.URL.String(),
+            "userAgent": r.Header.Get("User-Agent"),
+            "referrer":  r.Header.Get("Referer"),
         },
     })
 }
