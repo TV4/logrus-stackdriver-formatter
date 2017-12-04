@@ -133,7 +133,7 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		}
 
 		// Extract report location from call stack.
-		c := stack.Caller(4)
+		c := stack.Caller(5)
 
 		lineNumber, _ := strconv.ParseInt(fmt.Sprintf("%d", c), 10, 64)
 
