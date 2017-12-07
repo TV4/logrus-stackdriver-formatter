@@ -3,6 +3,8 @@ package stackdriver
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -59,8 +61,9 @@ type entry struct {
 
 // Formatter implements Stackdriver formatting for logrus.
 type Formatter struct {
-	Service string
-	Version string
+	Service    string
+	Version    string
+	skipRegexp *regexp.Regexp // skip function on the callstack matching this expression
 }
 
 // Option lets you configure the Formatter.
@@ -86,6 +89,7 @@ func NewFormatter(options ...Option) *Formatter {
 	for _, option := range options {
 		option(&fmtr)
 	}
+	fmtr.skipRegexp = regexp.MustCompile(`/logrus\.`)
 	return &fmtr
 }
 
@@ -133,7 +137,16 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		}
 
 		// Extract report location from call stack.
-		c := stack.Caller(4)
+		// skip frames until the function is not from logrus package (or give up at 6)
+		skipFrames := 1
+		for ; skipFrames <= 6; skipFrames++ {
+			pc, _, _, _ := runtime.Caller(skipFrames)
+			details := runtime.FuncForPC(pc)
+			if !f.skipRegexp.MatchString(details.Name()) {
+				break
+			}
+		}
+		c := stack.Caller(skipFrames)
 
 		lineNumber, _ := strconv.ParseInt(fmt.Sprintf("%d", c), 10, 64)
 
