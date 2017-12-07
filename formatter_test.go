@@ -12,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const repositoryName = "github.com/wattx"
+const repositoryName = "github.com/TV4"
 
 func TestFormatter(t *testing.T) {
 	skipTimestamp = true
