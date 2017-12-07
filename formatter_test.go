@@ -12,6 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const repositoryName = "github.com/wattx"
+
 func TestFormatter(t *testing.T) {
 	skipTimestamp = true
 
@@ -70,19 +72,19 @@ var formatterTests = []struct {
 					"foo": "bar",
 				},
 				"reportLocation": map[string]interface{}{
-					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   28.0,
-					"functionName": "TestFormatter",
+					"filePath":     repositoryName + "/logrus-stackdriver-formatter/formatter_test.go",
+					"lineNumber":   61.0,
+					"functionName": "glob..func2",
 				},
 			},
 		},
 	},
 	{
 		run: func(logger *logrus.Logger) {
-			logger.
+			l := logger.
 				WithField("foo", "bar").
-				WithError(errors.New("test error")).
-				Error("my log entry")
+				WithError(errors.New("test error"))
+			l.Error("my log entry")
 		},
 		out: map[string]interface{}{
 			"severity": "ERROR",
@@ -96,9 +98,9 @@ var formatterTests = []struct {
 					"foo": "bar",
 				},
 				"reportLocation": map[string]interface{}{
-					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   28.0,
-					"functionName": "TestFormatter",
+					"filePath":     repositoryName + "/logrus-stackdriver-formatter/formatter_test.go",
+					"lineNumber":   87.0,
+					"functionName": "glob..func3",
 				},
 			},
 		},
@@ -129,9 +131,9 @@ var formatterTests = []struct {
 					"method": "GET",
 				},
 				"reportLocation": map[string]interface{}{
-					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   28.0,
-					"functionName": "TestFormatter",
+					"filePath":     repositoryName + "/logrus-stackdriver-formatter/formatter_test.go",
+					"lineNumber":   117.0,
+					"functionName": "glob..func4",
 				},
 			},
 		},
