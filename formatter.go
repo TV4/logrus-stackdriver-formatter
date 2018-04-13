@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-stack/stack"
@@ -59,8 +60,9 @@ type entry struct {
 
 // Formatter implements Stackdriver formatting for logrus.
 type Formatter struct {
-	Service string
-	Version string
+	Service   string
+	Version   string
+	StackSkip []string
 }
 
 // Option lets you configure the Formatter.
@@ -80,13 +82,51 @@ func WithVersion(v string) Option {
 	}
 }
 
+// WithStackSkip lets you configure which packages should be skipped for locating the error.
+func WithStackSkip(v string) Option {
+	return func(f *Formatter) {
+		f.StackSkip = append(f.StackSkip, v)
+	}
+}
+
 // NewFormatter returns a new Formatter.
 func NewFormatter(options ...Option) *Formatter {
-	var fmtr Formatter
+	fmtr := Formatter{
+		StackSkip: []string{
+			"github.com/sirupsen/logrus",
+		},
+	}
 	for _, option := range options {
 		option(&fmtr)
 	}
 	return &fmtr
+}
+
+func (f *Formatter) errorOrigin() (stack.Call, error) {
+	skip := func(pkg string) bool {
+		for _, skip := range f.StackSkip {
+			if pkg == skip {
+				return true
+			}
+		}
+		return false
+	}
+
+	// We start at 2 to skip this call and our caller's call.
+	for i := 2; ; i++ {
+		c := stack.Caller(i)
+		// ErrNoFunc indicates we're over traversing the stack.
+		if _, err := c.MarshalText(); err != nil {
+			return stack.Call{}, nil
+		}
+		pkg := fmt.Sprintf("%+k", c)
+		// Remove vendoring from package path.
+		parts := strings.SplitN(pkg, "/vendor/", 2)
+		pkg = parts[len(parts)-1]
+		if !skip(pkg) {
+			return c, nil
+		}
+	}
 }
 
 // Format formats a logrus entry according to the Stackdriver specifications.
@@ -133,14 +173,14 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		}
 
 		// Extract report location from call stack.
-		c := stack.Caller(4)
+		if c, err := f.errorOrigin(); err == nil {
+			lineNumber, _ := strconv.ParseInt(fmt.Sprintf("%d", c), 10, 64)
 
-		lineNumber, _ := strconv.ParseInt(fmt.Sprintf("%d", c), 10, 64)
-
-		ee.Context.ReportLocation = &reportLocation{
-			FilePath:     fmt.Sprintf("%+s", c),
-			LineNumber:   int(lineNumber),
-			FunctionName: fmt.Sprintf("%n", c),
+			ee.Context.ReportLocation = &reportLocation{
+				FilePath:     fmt.Sprintf("%+s", c),
+				LineNumber:   int(lineNumber),
+				FunctionName: fmt.Sprintf("%n", c),
+			}
 		}
 	}
 
