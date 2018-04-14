@@ -42,18 +42,19 @@ Here's a sample entry (prettified) from the example:
 
 ```json
 {
-  "context": {    "reportLocation": {
-      "filePath": "example/main.go",
-      "lineNumber": 22,
-      "functionName": "main"
-    }
-  },
-  "message": "unable to parse integer: strconv.ParseInt: parsing \"text\": invalid syntax",
   "serviceContext": {
     "service": "test-service",
     "version": "v0.1.0"
   },
-  "severity": "ERROR"
+  "message": "unable to parse integer: strconv.ParseInt: parsing \"text\": invalid syntax",
+  "severity": "ERROR",
+  "context": {
+    "reportLocation": {
+      "filePath": "github.com/TV4/logrus-stackdriver-formatter/example_test.go",
+      "lineNumber": 21,
+      "functionName": "ExampleLogError"
+    }
+  }
 }
 ```
 
