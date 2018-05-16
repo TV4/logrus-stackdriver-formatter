@@ -33,29 +33,50 @@ var levelsToSeverity = map[logrus.Level]severity{
 	logrus.PanicLevel: severityAlert,
 }
 
-type serviceContext struct {
+type ServiceContext struct {
 	Service string `json:"service,omitempty"`
 	Version string `json:"version,omitempty"`
 }
 
-type reportLocation struct {
-	FilePath     string `json:"filePath,omitempty"`
-	LineNumber   int    `json:"lineNumber,omitempty"`
-	FunctionName string `json:"functionName,omitempty"`
+type ReportLocation struct {
+	FilePath     string `json:"file,omitempty"`
+	LineNumber   int    `json:"line,omitempty"`
+	FunctionName string `json:"function,omitempty"`
 }
 
-type context struct {
+type Context struct {
 	Data           map[string]interface{} `json:"data,omitempty"`
-	ReportLocation *reportLocation        `json:"reportLocation,omitempty"`
+	ReportLocation *ReportLocation        `json:"reportLocation,omitempty"`
 	HTTPRequest    map[string]interface{} `json:"httpRequest,omitempty"`
 }
 
-type entry struct {
+type HttpRequest struct {
+	RequestMethod                  string `json:"requestMethod,omitempty"`
+	RequestUrl                     string `json:"requestUrl,omitempty"`
+	RequestSize                    string `json:"requestSize,omitempty"`
+	Status                         int    `json:"status,omitempty"`
+	ResponseSize                   string `json:"responseSize,omitempty"`
+	UserAgent                      string `json:"userAgent,omitempty"`
+	ServerIp                       string `json:"serverIp,omitempty"`
+	Referer                        string `json:"referer,omitempty"`
+	Latency                        string `json:"latency,omitempty"`
+	CacheLookup                    bool   `json:"cacheLookup,omitempty"`
+	CacheHit                       bool   `json:"cacheHit,omitempty"`
+	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer,omitempty"`
+	CacheFillBytes                 string `json:"cacheFillBytes,omitempty"`
+	Protocol                       string `json:"protocol,omitempty"`
+}
+
+type Entry struct {
+	LogName        string          `json:"logName,omitempty"`
 	Timestamp      string          `json:"timestamp,omitempty"`
-	ServiceContext *serviceContext `json:"serviceContext,omitempty"`
-	Message        string          `json:"message,omitempty"`
 	Severity       severity        `json:"severity,omitempty"`
-	Context        *context        `json:"context,omitempty"`
+	HTTPRequest    *HttpRequest    `json:"httpRequest"`
+	Trace          string          `json:"trace,omitempty"`
+	ServiceContext *ServiceContext `json:"serviceContext,omitempty"`
+	Message        string          `json:"message,omitempty"`
+	Context        *Context        `json:"context,omitempty"`
+	SourceLocation *ReportLocation `json:"sourceLocation,omitempty"`
 }
 
 // Formatter implements Stackdriver formatting for logrus.
@@ -133,13 +154,25 @@ func (f *Formatter) errorOrigin() (stack.Call, error) {
 func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	severity := levelsToSeverity[e.Level]
 
-	ee := entry{
+	ee := Entry{
 
 		Message:  e.Message,
 		Severity: severity,
-		Context: &context{
+		Context: &Context{
 			Data: e.Data,
 		},
+	}
+
+	// if val, ok := e.Data["trace"]; ok {
+	// 	ee.Trace = val.(string)
+	// }
+
+	if val, ok := e.Data["httpRequest"]; ok {
+		ee.HTTPRequest = val.(*HttpRequest)
+	}
+
+	if val, ok := e.Data["logName"]; ok {
+		ee.LogName = val.(string)
 	}
 
 	if !skipTimestamp {
@@ -148,7 +181,7 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 
 	switch severity {
 	case severityError, severityCritical, severityAlert:
-		ee.ServiceContext = &serviceContext{
+		ee.ServiceContext = &ServiceContext{
 			Service: f.Service,
 			Version: f.Version,
 		}
@@ -176,7 +209,13 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		if c, err := f.errorOrigin(); err == nil {
 			lineNumber, _ := strconv.ParseInt(fmt.Sprintf("%d", c), 10, 64)
 
-			ee.Context.ReportLocation = &reportLocation{
+			ee.Context.ReportLocation = &ReportLocation{
+				FilePath:     fmt.Sprintf("%+s", c),
+				LineNumber:   int(lineNumber),
+				FunctionName: fmt.Sprintf("%n", c),
+			}
+
+			ee.SourceLocation = &ReportLocation{
 				FilePath:     fmt.Sprintf("%+s", c),
 				LineNumber:   int(lineNumber),
 				FunctionName: fmt.Sprintf("%n", c),
