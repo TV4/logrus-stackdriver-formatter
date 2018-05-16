@@ -51,21 +51,21 @@ type Context struct {
 }
 
 type HttpRequest struct {
-	RequestMethod                  string        `json:"requestMethod,omitempty"`
-	RequestUrl                     string        `json:"requestUrl,omitempty"`
-	RequestSize                    string        `json:"requestSize,omitempty"`
-	Status                         int           `json:"status,omitempty"`
-	ResponseSize                   int64         `json:"responseSize,omitempty"`
-	UserAgent                      string        `json:"userAgent,omitempty"`
-	RemoteIp                       string        `json:"remoteIp,omitempty"`
-	ServerIp                       string        `json:"serverIp,omitempty"`
-	Referer                        string        `json:"referer,omitempty"`
-	Latency                        time.Duration `json:"latency,omitempty"`
-	CacheLookup                    bool          `json:"cacheLookup,omitempty"`
-	CacheHit                       bool          `json:"cacheHit,omitempty"`
-	CacheValidatedWithOriginServer bool          `json:"cacheValidatedWithOriginServer,omitempty"`
-	CacheFillBytes                 string        `json:"cacheFillBytes,omitempty"`
-	Protocol                       string        `json:"protocol,omitempty"`
+	RequestMethod                  string `json:"requestMethod,omitempty"`
+	RequestUrl                     string `json:"requestUrl,omitempty"`
+	RequestSize                    string `json:"requestSize,omitempty"`
+	Status                         string `json:"status,omitempty"`
+	ResponseSize                   string `json:"responseSize,omitempty"`
+	UserAgent                      string `json:"userAgent,omitempty"`
+	RemoteIp                       string `json:"remoteIp,omitempty"`
+	ServerIp                       string `json:"serverIp,omitempty"`
+	Referer                        string `json:"referer,omitempty"`
+	Latency                        string `json:"latency,omitempty"`
+	CacheLookup                    bool   `json:"cacheLookup,omitempty"`
+	CacheHit                       bool   `json:"cacheHit,omitempty"`
+	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer,omitempty"`
+	CacheFillBytes                 string `json:"cacheFillBytes,omitempty"`
+	Protocol                       string `json:"protocol,omitempty"`
 }
 
 type Entry struct {
