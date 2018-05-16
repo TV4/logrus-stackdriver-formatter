@@ -84,6 +84,7 @@ type Entry struct {
 type Formatter struct {
 	Service   string
 	Version   string
+	ProjectID string
 	StackSkip []string
 }
 
@@ -101,6 +102,12 @@ func WithService(n string) Option {
 func WithVersion(v string) Option {
 	return func(f *Formatter) {
 		f.Version = v
+	}
+}
+
+func WithProjectID(i string) Option {
+	return func(f *Formatter) {
+		f.ProjectID = i
 	}
 }
 
@@ -172,8 +179,8 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		ee.HTTPRequest = val.(*HttpRequest)
 	}
 
-	if val, ok := e.Data["logName"]; ok {
-		ee.LogName = val.(string)
+	if val, ok := e.Data["logID"]; ok {
+		ee.LogName = "projects/" + f.ProjectID + "/logs/" + val.(string)
 	}
 
 	if !skipTimestamp {
