@@ -71,7 +71,7 @@ type Entry struct {
 	LogName        string          `json:"logName,omitempty"`
 	Timestamp      string          `json:"timestamp,omitempty"`
 	Severity       severity        `json:"severity,omitempty"`
-	HTTPRequest    *HttpRequest    `json:"httpRequest"`
+	HTTPRequest    *HttpRequest    `json:"httpRequest,omitempty"`
 	Trace          string          `json:"trace,omitempty"`
 	ServiceContext *ServiceContext `json:"serviceContext,omitempty"`
 	Message        string          `json:"message,omitempty"`
@@ -163,9 +163,9 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		},
 	}
 
-	// if val, ok := e.Data["trace"]; ok {
-	// 	ee.Trace = val.(string)
-	// }
+	if val, ok := e.Data["trace"]; ok {
+		ee.Trace = val.(string)
+	}
 
 	if val, ok := e.Data["httpRequest"]; ok {
 		ee.HTTPRequest = val.(*HttpRequest)
