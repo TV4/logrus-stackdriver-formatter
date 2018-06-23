@@ -129,6 +129,22 @@ func (f *Formatter) errorOrigin() (stack.Call, error) {
 	}
 }
 
+// taken from https://github.com/sirupsen/logrus/blob/master/json_formatter.go#L51
+func replaceErrors(source logrus.Fields) logrus.Fields {
+	data := make(logrus.Fields, len(source))
+	for k, v := range source {
+		switch v := v.(type) {
+		case error:
+			// Otherwise errors are ignored by `encoding/json`
+			// https://github.com/sirupsen/logrus/issues/137
+			data[k] = v.Error()
+		default:
+			data[k] = v
+		}
+	}
+	return data
+}
+
 // Format formats a logrus entry according to the Stackdriver specifications.
 func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	severity := levelsToSeverity[e.Level]
@@ -138,7 +154,7 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		Message:  e.Message,
 		Severity: severity,
 		Context: &context{
-			Data: e.Data,
+			Data: replaceErrors(e.Data),
 		},
 	}
 
