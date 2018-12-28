@@ -22,7 +22,7 @@ package main
 
 import (
     "github.com/sirupsen/logrus"
-    stackdriver "github.com/TV4/logrus-stackdriver-formatter"
+    stackdriver "github.com/brpx/logrus-stackdriver-formatter"
 )
 
 var log = logrus.New()
