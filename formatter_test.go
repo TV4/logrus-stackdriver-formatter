@@ -56,6 +56,24 @@ var formatterTests = []struct {
 	},
 	{
 		run: func(logger *logrus.Logger) {
+			logger.
+				WithField("foo", "bar").
+				WithError(errors.New("test error")).
+				Info("my log entry")
+		},
+		out: map[string]interface{}{
+			"severity": "INFO",
+			"message":  "my log entry",
+			"context": map[string]interface{}{
+				"data": map[string]interface{}{
+					"foo":   "bar",
+					"error": "test error",
+				},
+			},
+		},
+	},
+	{
+		run: func(logger *logrus.Logger) {
 			logger.WithField("foo", "bar").Error("my log entry")
 		},
 		out: map[string]interface{}{
@@ -71,8 +89,8 @@ var formatterTests = []struct {
 				},
 				"reportLocation": map[string]interface{}{
 					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   59.0,
-					"functionName": "glob..func2",
+					"lineNumber":   77.0,
+					"functionName": "glob..func3",
 				},
 			},
 		},
@@ -97,8 +115,8 @@ var formatterTests = []struct {
 				},
 				"reportLocation": map[string]interface{}{
 					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   85.0,
-					"functionName": "glob..func3",
+					"lineNumber":   103.0,
+					"functionName": "glob..func4",
 				},
 			},
 		},
@@ -130,8 +148,8 @@ var formatterTests = []struct {
 				},
 				"reportLocation": map[string]interface{}{
 					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   115.0,
-					"functionName": "glob..func4",
+					"lineNumber":   133.0,
+					"functionName": "glob..func5",
 				},
 			},
 		},
