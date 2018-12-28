@@ -179,7 +179,6 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	severity := levelsToSeverity[e.Level]
 
 	ee := Entry{
-
 		Message:  e.Message,
 		Severity: severity,
 		Context: &Context{
@@ -252,5 +251,5 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		return nil, err
 	}
 
-	return append(b, '\n'), nil
+	return b, nil
 }
