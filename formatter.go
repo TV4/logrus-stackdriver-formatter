@@ -251,5 +251,5 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 		return nil, err
 	}
 
-	return b, nil
+	return append(b, '\n'), nil
 }
