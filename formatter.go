@@ -33,32 +33,36 @@ var levelsToSeverity = map[logrus.Level]severity{
 	logrus.PanicLevel: severityAlert,
 }
 
+// ServiceContext provides the data about the service we are sending to Google.
 type ServiceContext struct {
 	Service string `json:"service,omitempty"`
 	Version string `json:"version,omitempty"`
 }
 
+// ReportLocation is the information about where an error occurred.
 type ReportLocation struct {
 	FilePath     string `json:"file,omitempty"`
 	LineNumber   int    `json:"line,omitempty"`
 	FunctionName string `json:"function,omitempty"`
 }
 
+// Context is sent with every message to stackdriver.
 type Context struct {
 	Data           map[string]interface{} `json:"data,omitempty"`
 	ReportLocation *ReportLocation        `json:"reportLocation,omitempty"`
 	HTTPRequest    map[string]interface{} `json:"httpRequest,omitempty"`
 }
 
-type HttpRequest struct {
+// HTTPRequest defines details of a request and response to append to a log.
+type HTTPRequest struct {
 	RequestMethod                  string `json:"requestMethod,omitempty"`
-	RequestUrl                     string `json:"requestUrl,omitempty"`
+	RequestURL                     string `json:"requestUrl,omitempty"`
 	RequestSize                    string `json:"requestSize,omitempty"`
 	Status                         string `json:"status,omitempty"`
 	ResponseSize                   string `json:"responseSize,omitempty"`
 	UserAgent                      string `json:"userAgent,omitempty"`
-	RemoteIp                       string `json:"remoteIp,omitempty"`
-	ServerIp                       string `json:"serverIp,omitempty"`
+	RemoteIP                       string `json:"remoteIp,omitempty"`
+	ServerIP                       string `json:"serverIp,omitempty"`
 	Referer                        string `json:"referer,omitempty"`
 	Latency                        string `json:"latency,omitempty"`
 	CacheLookup                    bool   `json:"cacheLookup,omitempty"`
@@ -68,11 +72,12 @@ type HttpRequest struct {
 	Protocol                       string `json:"protocol,omitempty"`
 }
 
+// Entry stores a log entry.
 type Entry struct {
 	LogName        string          `json:"logName,omitempty"`
 	Timestamp      string          `json:"timestamp,omitempty"`
 	Severity       severity        `json:"severity,omitempty"`
-	HTTPRequest    *HttpRequest    `json:"httpRequest,omitempty"`
+	HTTPRequest    *HTTPRequest    `json:"httpRequest,omitempty"`
 	Trace          string          `json:"trace,omitempty"`
 	ServiceContext *ServiceContext `json:"serviceContext,omitempty"`
 	Message        string          `json:"message,omitempty"`
@@ -105,6 +110,7 @@ func WithVersion(v string) Option {
 	}
 }
 
+// WithProjectID makes sure all entries have your Project information.
 func WithProjectID(i string) Option {
 	return func(f *Formatter) {
 		f.ProjectID = i
@@ -191,7 +197,7 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	}
 
 	if val, ok := e.Data["httpRequest"]; ok {
-		ee.HTTPRequest = val.(*HttpRequest)
+		ee.HTTPRequest = val.(*HTTPRequest)
 	}
 
 	if val, ok := e.Data["logID"]; ok {
