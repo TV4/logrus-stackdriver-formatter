@@ -90,10 +90,15 @@ var formatterTests = []struct {
 					"foo": "bar",
 				},
 				"reportLocation": map[string]interface{}{
-					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   77.0,
-					"functionName": "glob..func3",
+					"file":     "github.com/icco/logrus-stackdriver-formatter/formatter.go",
+					"line":     263.0,
+					"function": "(*Formatter).Format",
 				},
+			},
+			"sourceLocation": map[string]interface{}{
+				"file":     "github.com/icco/logrus-stackdriver-formatter/formatter.go",
+				"line":     263.0,
+				"function": "(*Formatter).Format",
 			},
 		},
 	},
@@ -117,10 +122,15 @@ var formatterTests = []struct {
 					"foo": "bar",
 				},
 				"reportLocation": map[string]interface{}{
-					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   103.0,
-					"functionName": "glob..func4",
+					"file":     "github.com/icco/logrus-stackdriver-formatter/formatter.go",
+					"line":     263.0,
+					"function": "(*Formatter).Format",
 				},
+			},
+			"sourceLocation": map[string]interface{}{
+				"file":     "github.com/icco/logrus-stackdriver-formatter/formatter.go",
+				"line":     263.0,
+				"function": "(*Formatter).Format",
 			},
 		},
 	},
@@ -146,15 +156,20 @@ var formatterTests = []struct {
 			"context": map[string]interface{}{
 				"data": map[string]interface{}{
 					"foo": "bar",
-				},
-				"httpRequest": map[string]interface{}{
-					"method": "GET",
+					"httpRequest": map[string]interface{}{
+						"requestMethod": "GET",
+					},
 				},
 				"reportLocation": map[string]interface{}{
-					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
-					"lineNumber":   133.0,
-					"functionName": "glob..func5",
+					"file":     "github.com/icco/logrus-stackdriver-formatter/formatter.go",
+					"line":     263.0,
+					"function": "(*Formatter).Format",
 				},
+			},
+			"sourceLocation": map[string]interface{}{
+				"file":     "github.com/icco/logrus-stackdriver-formatter/formatter.go",
+				"line":     263.0,
+				"function": "(*Formatter).Format",
 			},
 		},
 	},

@@ -50,7 +50,7 @@ type ReportLocation struct {
 type Context struct {
 	Data           map[string]interface{} `json:"data,omitempty"`
 	ReportLocation *ReportLocation        `json:"reportLocation,omitempty"`
-	HTTPRequest    map[string]interface{} `json:"httpRequest,omitempty"`
+	HTTPRequest    *HTTPRequest           `json:"httpRequest,omitempty"`
 }
 
 // HTTPRequest defines details of a request and response to append to a log.
@@ -200,8 +200,6 @@ func (f *Formatter) ToEntry(e *logrus.Entry) (Entry, error) {
 		r, ok := val.(*HTTPRequest)
 		if ok {
 			ee.HTTPRequest = r
-		} else {
-			return ee, fmt.Errorf("httpRequest is not valid")
 		}
 	}
 
@@ -233,7 +231,7 @@ func (f *Formatter) ToEntry(e *logrus.Entry) (Entry, error) {
 		// As a convenience, when using supplying the httpRequest field, it
 		// gets special care.
 		if reqData, ok := ee.Context.Data["httpRequest"]; ok {
-			if req, ok := reqData.(map[string]interface{}); ok {
+			if req, ok := reqData.(*HTTPRequest); ok {
 				ee.Context.HTTPRequest = req
 				delete(ee.Context.Data, "httpRequest")
 			}
@@ -262,10 +260,7 @@ func (f *Formatter) ToEntry(e *logrus.Entry) (Entry, error) {
 
 // Format formats a logrus entry according to the Stackdriver specifications.
 func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
-	ee, err := f.ToEntry(e)
-	if err != nil {
-		return nil, err
-	}
+	ee, _ := f.ToEntry(e)
 
 	b, err := json.Marshal(ee)
 	if err != nil {
