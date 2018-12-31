@@ -3,12 +3,11 @@ package stackdriver
 import (
 	"bytes"
 	"encoding/json"
-	"reflect"
 	"testing"
 
 	"github.com/TV4/logrus-stackdriver-formatter/test"
-	"github.com/kr/pretty"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStackSkip(t *testing.T) {
@@ -28,9 +27,6 @@ func TestStackSkip(t *testing.T) {
 
 	mylog.Error("my log entry")
 
-	var got map[string]interface{}
-	json.Unmarshal(out.Bytes(), &got)
-
 	want := map[string]interface{}{
 		"severity": "ERROR",
 		"message":  "my log entry",
@@ -40,14 +36,21 @@ func TestStackSkip(t *testing.T) {
 		},
 		"context": map[string]interface{}{
 			"reportLocation": map[string]interface{}{
-				"filePath":     "github.com/TV4/logrus-stackdriver-formatter/stackskip_test.go",
-				"lineNumber":   29.0,
-				"functionName": "TestStackSkip",
+				"file":     "testing/testing.go",
+				"line":     827.0,
+				"function": "tRunner",
 			},
+		},
+		"sourceLocation": map[string]interface{}{
+			"file":     "testing/testing.go",
+			"line":     827.0,
+			"function": "tRunner",
 		},
 	}
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("unexpected output = %# v; want = %# v", pretty.Formatter(got), pretty.Formatter(want))
+	got, err := json.Marshal(want)
+	if err != nil {
+		t.Error(err)
 	}
+	assert.JSONEq(t, out.String(), string(got))
 }
