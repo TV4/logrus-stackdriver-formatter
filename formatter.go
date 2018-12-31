@@ -196,8 +196,13 @@ func (f *Formatter) ToEntry(e *logrus.Entry) (Entry, error) {
 		ee.Trace = val.(string)
 	}
 
-	if val, ok := e.Data["httpRequest"]; ok {
-		ee.HTTPRequest = val.(*HTTPRequest)
+	if val, exists := e.Data["httpRequest"]; exists {
+		r, ok := val.(*HTTPRequest)
+		if ok {
+			ee.HTTPRequest = r
+		} else {
+			return ee, fmt.Errorf("httpRequest is not valid")
+		}
 	}
 
 	if val, ok := e.Data["logID"]; ok {
