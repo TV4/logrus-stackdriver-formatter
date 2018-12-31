@@ -1,4 +1,4 @@
-package stackdriver_test
+package stackdriver_example
 
 import (
 	"os"

@@ -1,17 +1,16 @@
 language: go
 
 go:
-  - 1.9.2
+  - "1.9.x"
+  - "1.10.x"
+  - "1.11.x"
 
 sudo: false
 
-install:
-  - go get github.com/go-stack/stack
-  - go get github.com/sirupsen/logrus
+before_script:
   - go get golang.org/x/lint/golint
-  - go get github.com/kr/pretty
 
 script:
   - golint -set_exit_status
   - go vet
-  - go test
+  - go test -v ./...
