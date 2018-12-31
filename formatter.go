@@ -180,8 +180,8 @@ func replaceErrors(source logrus.Fields) logrus.Fields {
 	return data
 }
 
-// Format formats a logrus entry according to the Stackdriver specifications.
-func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
+// ToEntry formats a logrus entry to a stackdriver entry.
+func (f *Formatter) ToEntry(e *logrus.Entry) (Entry, error) {
 	severity := levelsToSeverity[e.Level]
 
 	ee := Entry{
@@ -250,6 +250,16 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 				FunctionName: fmt.Sprintf("%n", c),
 			}
 		}
+	}
+
+	return ee, nil
+}
+
+// Format formats a logrus entry according to the Stackdriver specifications.
+func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
+	ee, err := f.ToEntry(e)
+	if err != nil {
+		return nil, err
 	}
 
 	b, err := json.Marshal(ee)
