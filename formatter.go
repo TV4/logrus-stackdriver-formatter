@@ -129,6 +129,7 @@ func NewFormatter(options ...Option) *Formatter {
 	fmtr := Formatter{
 		StackSkip: []string{
 			"github.com/sirupsen/logrus",
+			"github.com/icco/logrus-stackdriver-formatter",
 		},
 	}
 	for _, option := range options {
