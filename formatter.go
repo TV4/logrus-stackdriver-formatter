@@ -143,7 +143,7 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	}
 
 	if !skipTimestamp {
-		ee.Timestamp = time.Now().UTC().Format(time.RFC3339)
+		ee.Timestamp = time.Now().UTC().Format(time.RFC3339Nano)
 	}
 
 	switch severity {
