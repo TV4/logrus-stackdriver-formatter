@@ -94,6 +94,7 @@ func NewFormatter(options ...Option) *Formatter {
 	fmtr := Formatter{
 		StackSkip: []string{
 			"github.com/sirupsen/logrus",
+			"vendor/github.com/sirupsen/logrus",
 		},
 	}
 	for _, option := range options {
